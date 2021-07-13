@@ -3,17 +3,22 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Provide audio to the game.
+/// </summary>
 namespace Outscal.BasicUnity2DProject
 {
     public class SoundManager : MonoBehaviour
     {
+        [Header("Sound Settings")]
         private static SoundManager instance;
         public static SoundManager Instance { get { return instance; } }
         [SerializeField] private AudioSource soundEffect;
         [SerializeField] private AudioSource soundMusic;
         [SerializeField] private SoundType[] Sounds;
-        public bool IsMute = false;
+        public bool isMute = false;
         public float Volume = 1f;
+
         private void Awake()
         {
             if (instance == null)
@@ -26,6 +31,7 @@ namespace Outscal.BasicUnity2DProject
                 Destroy(gameObject);
             }
         }
+
         private void Start()
         {
             SetVolume(0.5f);
@@ -34,7 +40,7 @@ namespace Outscal.BasicUnity2DProject
 
         public void Mute(bool status)
         {
-            IsMute = status;
+            isMute = status;
         }
 
         public void SetVolume(float volume)
@@ -43,9 +49,10 @@ namespace Outscal.BasicUnity2DProject
             soundEffect.volume = volume;
             soundMusic.volume = volume;
         }
+
         public void PlayMusic(Sounds sound)
         {
-            if (IsMute)
+            if (isMute)
             {
                 return;
             }
@@ -64,7 +71,7 @@ namespace Outscal.BasicUnity2DProject
 
         public void Play(Sounds sound)
         {
-            if (IsMute)
+            if (isMute)
             {
                 return;
             }
@@ -79,6 +86,7 @@ namespace Outscal.BasicUnity2DProject
                 Debug.LogError("Clip not found for sound type: " + sound);
             }
         }
+
         private AudioClip getSoundClip(Sounds sound)
         {
             SoundType item = Array.Find(Sounds, i => i.soundType == sound);
@@ -88,7 +96,6 @@ namespace Outscal.BasicUnity2DProject
             }
             return null;
         }
-
     }
 
     [Serializable]
@@ -98,9 +105,10 @@ namespace Outscal.BasicUnity2DProject
         public AudioClip soundClip;
     }
 }
+
 public enum Sounds
 {
-    ButtonClick,
+    buttonClick,
     Music,
     PlayerMove,
     PlayerDeath,

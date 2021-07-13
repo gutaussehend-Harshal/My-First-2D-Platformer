@@ -2,12 +2,19 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Providing movement to an enemy.
+/// Enemy patrolling.
+/// Whenever player collides to an enemy it will die.
+/// </summary>
 namespace Outscal.BasicUnity2DProject
 {
     public class EnemyController : MonoBehaviour
     {
+        [Header("Enemy Settings")]
         [SerializeField] private float speed;
         private bool moveRight;
+
         void Update()
         {
             if (moveRight)
@@ -22,6 +29,7 @@ namespace Outscal.BasicUnity2DProject
             }
         }
 
+        // Whenevr an enemy collides to collider it will change it's direction.
         private void OnTriggerEnter2D(Collider2D trig)
         {
             if (trig.gameObject.CompareTag("turn"))
@@ -29,7 +37,6 @@ namespace Outscal.BasicUnity2DProject
                 if (moveRight)
                 {
                     moveRight = false;
-
                 }
                 else
                 {
@@ -38,6 +45,7 @@ namespace Outscal.BasicUnity2DProject
             }
         }
 
+        // Whenever player collides to an enemy it will die.
         private void OnCollisionEnter2D(Collision2D collision)
         {
             if (collision.gameObject.GetComponent<PlayerController>() != null)

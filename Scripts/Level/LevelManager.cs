@@ -2,13 +2,18 @@
 using System;
 using UnityEngine.SceneManagement;
 
+/// <summary>
+/// Set level status to complete.
+/// </summary>
 namespace Outscal.BasicUnity2DProject
 {
     public class LevelManager : MonoBehaviour
     {
+        [Header("LevelManager Settings")]
         private static LevelManager instance;
         [SerializeField] private string[] Levels;
         public static LevelManager Instance { get { return instance; } }
+
         private void Awake()
         {
             if (instance == null)
@@ -30,10 +35,10 @@ namespace Outscal.BasicUnity2DProject
             }
         }
 
+        // Set level status to complete.
         public void MarkCurrentLevelComplete()
         {
             Scene currentScene = SceneManager.GetActiveScene();
-            // Set level status to complete
             SetLevelStatus(currentScene.name, LevelStatus.Completed);
             int currentSceneIndex = Array.FindIndex(Levels, level => level == currentScene.name);
             int nextSceneIndex = currentSceneIndex + 1;

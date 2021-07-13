@@ -1,3 +1,6 @@
+/// <summary>
+/// Stored level status.
+/// </summary>
 namespace Outscal.BasicUnity2DProject
 {
     public enum LevelStatus

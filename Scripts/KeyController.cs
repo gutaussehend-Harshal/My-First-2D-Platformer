@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Whenever player hits the key it will be destoyed.
+/// </summary>
 namespace Outscal.BasicUnity2DProject
 {
     public class KeyController : MonoBehaviour

@@ -4,37 +4,57 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
+/// <summary>
+/// Implemented basics player movement like run, jump and crouch.
+/// </summary>
 namespace Outscal.BasicUnity2DProject
 {
     public class PlayerController : MonoBehaviour
     {
-        [SerializeField] private float timer = 0.2f;
-        [SerializeField] private ScoreController scoreController;
-        [SerializeField] private GameOverController gameOverController;
-        [SerializeField] private Animator animator;
-        [SerializeField] private float speed;
-        BoxCollider2D boxCollider2D;
         Rigidbody2D rb2d;
+        BoxCollider2D boxCollider2D;
+        [Header("PlayerHurt Settings")]
+        [SerializeField] private float timer = 0.2f;
+        [Header("Score Settings")]
+        [SerializeField] private ScoreController scoreController;
+        private int scoreIncrement = 10;
+        [Header("GameOver Settings")]
+        [SerializeField] private GameOverController gameOverController;
+        [Header("Animator Settings")]
+        [SerializeField] private Animator animator;
+        [Header("Health Settings")]
+        [SerializeField] private int livesRemain = 3;
+        [SerializeField] private Image[] heart;
+        [Header("Audio Settings")]
+        [SerializeField] private AudioSource audioSource;
+        [Header("Player Movement Settings")]
+        [SerializeField] private float speed;
+        [SerializeField] private float jumpForce;
+        [SerializeField] private Transform groundCheck;
+        [SerializeField] private LayerMask groundLayer;
+        bool canDoubleJump;
+        bool isGrounded;
+        bool gameOver;
         [SerializeField] private Vector2 crouchoffset;
         [SerializeField] private Vector2 crouchsize;
         [SerializeField] private Vector2 offset;
         [SerializeField] private Vector2 size;
-        [SerializeField] private int livesRemain = 3;
-        private bool gameOver;
-        [SerializeField] private Image[] heart;
-        [SerializeField] private AudioSource audioSource;
-        private int scoreIncrement = 10;
+
         private void Awake()
         {
             rb2d = gameObject.GetComponent<Rigidbody2D>();
             boxCollider2D = gameObject.GetComponent<BoxCollider2D>();
         }
+
+        // Score will be increased by picking keys.
         public void PickUpKey()
         {
             Debug.Log("Player picked up the key");
             SoundManager.Instance.PlayMusic(Sounds.CollectItem);
             scoreController.IncreaseScore(scoreIncrement);
         }
+
+        // Player will be died if it falls down from platform or hits an enemy
         public void KillPlayer()
         {
             livesRemain--;
@@ -47,6 +67,8 @@ namespace Outscal.BasicUnity2DProject
                 gameOverController.PlayerDied();
             }
         }
+
+        // Update health bar of a player
         private void updateLifeUI()
         {
             heart[livesRemain].gameObject.SetActive(false);
@@ -56,22 +78,30 @@ namespace Outscal.BasicUnity2DProject
                 gameOver = true;
             }
         }
+
         private void Update()
         {
             float horizontal = Input.GetAxisRaw("Horizontal");
-            float verticle = Input.GetAxisRaw("Jump");
             PlayMovementAnimation(horizontal);
             PlayCrouchAnimation(horizontal);
-            PlayJumpAnimation(verticle);
             MoveCharacter(horizontal);
+            float verticle = Input.GetAxisRaw("Jump");
+            PlayJumpAnimation(verticle);
         }
-        // Move character horizontally
+
+        private void FixedUpdate()
+        {
+            isGrounded = Physics2D.OverlapCircle(groundCheck.position, 0.2f, groundLayer);
+        }
+        // Move player horizontally
         private void MoveCharacter(float horizontal)
         {
             Vector3 position = transform.position;
             position.x += horizontal * speed * Time.deltaTime;
             transform.position = position;
         }
+
+        // Player will be changed direction.
         private void PlayMovementAnimation(float horizontal)
         {
             animator.SetFloat("Speed", Mathf.Abs(horizontal));
@@ -86,21 +116,41 @@ namespace Outscal.BasicUnity2DProject
             }
             transform.localScale = scale;
         }
+
+        // Player will be jumped.
         private void PlayJumpAnimation(float veticle)
         {
             if (Input.GetKeyDown(KeyCode.Space))
             {
                 SoundManager.Instance.PlayMusic(Sounds.PlayerJump);
-                animator.SetBool("Jump", true);
-                rb2d.velocity = new Vector2(0.0f, 10.0f);
+                // rb2d.velocity = new Vector2(0.0f, 10.0f);
+                if (isGrounded)
+                {
+                    animator.SetBool("Jump", true);
+                    jump();
+                    canDoubleJump = true;
+                }
+                else if (canDoubleJump)
+                {
+                    jumpForce = jumpForce / 1.5f;
+                    animator.SetBool("Jump", true);
+                    jump();
+                    canDoubleJump = false;
+                    jumpForce = jumpForce * 1.5f;
+                }
             }
             else if (Input.GetKeyUp(KeyCode.Space))
             {
                 SoundManager.Instance.PlayMusic(Sounds.PlayerLand);
-                animator.SetBool("Jump", false);
-                rb2d.velocity = new Vector2(0.0f, -15.0f);
+                if (!isGrounded)
+                {
+                    animator.SetBool("Jump", false);
+                }
+                // rb2d.velocity = new Vector2(0.0f, -15.0f);
             }
         }
+
+        // player will be crouched.
         private void PlayCrouchAnimation(float horizontal)
         {
             if (Input.GetKeyDown(KeyCode.LeftControl))
@@ -116,12 +166,19 @@ namespace Outscal.BasicUnity2DProject
                 boxCollider2D.size = new Vector2(crouchsize.x, crouchsize.y);
             }
         }
+
+        // Player hurt animation will be played.
         IEnumerator playHurtAnimation()
         {
             yield return new WaitForSeconds(timer);
             transform.position = Vector2.zero;
             // transform.localScale = new Vector2(3f, 3f);
             animator.Play("Player_Idle");
+        }
+
+        void jump()
+        {
+            rb2d.velocity = Vector2.up * jumpForce;
         }
     }
 }

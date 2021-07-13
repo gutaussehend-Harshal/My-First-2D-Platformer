@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Whenever player fall down from platform it will die.
+/// </summary>
 namespace Outscal.BasicUnity2DProject
 {
     public class EndGame : MonoBehaviour
